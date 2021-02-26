@@ -72,7 +72,27 @@ view: game_end_states {
     sql: ${sum_server_timeout}/CAST(${count} AS DOUBLE) ;;
   }
 
+
+  # Player quite rate for game_started_indc = False.
+  dimension: find_player_quit {
+    type: number
+    sql: CASE WHEN ((${shutdown_reason_text} = 'playerDisconnect') OR (${shutdown_reason_text} = 'playerTerminated')) AND (${game_started_indc} = True) THEN 1 ELSE 0 END ;;
+    hidden: yes
+  }
+
+  measure: sum_player_quit {
+    type: sum
+    sql: ${find_player_quit} ;;
+    hidden: yes ## Do we want to hide this?
+  }
+
+  measure: player_quit_timeout_rate_game_not_started {
+    type: number
+    sql: ${sum_player_quit}/CAST(${count} AS DOUBLE) ;;
+  }
+
   set: detail {
     fields: [game_id, shutdown_reason_text, event_time_date, game_started_indc]
   }
+
 }
