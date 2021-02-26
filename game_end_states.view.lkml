@@ -16,8 +16,12 @@ view: game_end_states {
 
   suggestions: no
 
-  filter: filer_shutdown_reason {
+# How to get this to be a filter for shutdown_reason_text in the explore view?
+# Requires different name to shutdown_reason_text, but I don't see where to tell the filter to filter on shutdown_reason_text...
+  filter: shutdown_reason_text_filter {
     type: string
+    case_sensitive: no
+    description: "Filter for the shutdown reasons you'd like to see"
   }
 
   measure: count {
