@@ -41,7 +41,7 @@ view: game_end_states {
 
   dimension_group: event_time {
     type: time
-    timeframes: [raw, date, month, year]
+    timeframes: [raw, hour, date, month, year]
     sql: ${TABLE}.event_time ;;
   }
 
