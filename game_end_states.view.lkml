@@ -33,6 +33,7 @@ view: game_end_states {
 
   dimension_group: event_time {
     type: time
+    timeframes: [raw, date, month, year]
     sql: ${TABLE}.event_time ;;
   }
 
@@ -42,6 +43,6 @@ view: game_end_states {
   }
 
   set: detail {
-    fields: [game_id, shutdown_reason_text, event_time_time, game_started_indc]
+    fields: [game_id, shutdown_reason_text, event_time_date, game_started_indc]
   }
 }
