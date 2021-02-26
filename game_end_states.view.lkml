@@ -16,6 +16,10 @@ view: game_end_states {
 
   suggestions: no
 
+  filter: filer_shutdown_reason {
+    type: string
+  }
+
   measure: count {
     type: count
     drill_fields: [detail*]
