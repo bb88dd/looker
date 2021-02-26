@@ -76,7 +76,7 @@ view: game_end_states {
   # Player quite rate for game_started_indc = False.
   dimension: find_player_quit {
     type: number
-    sql: CASE WHEN ((${shutdown_reason_text} = 'playerDisconnect') OR (${shutdown_reason_text} = 'playerTerminated')) AND (${game_started_indc} = True) THEN 1 ELSE 0 END ;;
+    sql: CASE WHEN ((${shutdown_reason_text} = 'playerDisconnect') OR (${shutdown_reason_text} = 'playerTerminated')) AND (${game_started_indc} = False) THEN 1 ELSE 0 END ;;
     hidden: yes
   }
 
