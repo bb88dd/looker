@@ -14,7 +14,7 @@ view: game_end_states {
        ;;
   }
 
-  suggestions: no
+  # suggestions: no
 
 # How to get this to be a filter for shutdown_reason_text in the explore view?
 # Requires different name to shutdown_reason_text, but I don't see where to tell the filter to filter on shutdown_reason_text...
@@ -22,11 +22,13 @@ view: game_end_states {
     type: string
     case_sensitive: no
     description: "Filter for the shutdown reasons you'd like to see"
+    sql: ${shutdown_reason_text} ;;
   }
 
   measure: count {
     type: count
     drill_fields: [detail*]
+    # drill_fields: [event_time_date]
   }
 
   dimension: game_id {
@@ -37,6 +39,7 @@ view: game_end_states {
   dimension: shutdown_reason_text {
     type: string
     sql: ${TABLE}.shutdown_reason_text ;;
+    suggest_persist_for: "24 hours"
   }
 
   dimension_group: event_time {
@@ -46,8 +49,27 @@ view: game_end_states {
   }
 
   dimension: game_started_indc {
-    type: string
+    type: yesno
     sql: ${TABLE}.game_started_indc ;;
+  }
+
+  # CAST(SUM(CASE WHEN (shutdown_reason_text = 'serverConnectTimeout') THEN 1 ELSE 0 END) AS DOUBLE) / CAST(COUNT(*) AS DOUBLE)
+
+  dimension: find_server_timeout {
+    type: number
+    sql: CASE WHEN ((${shutdown_reason_text} = 'serverConnectTimeout') OR (${shutdown_reason_text} = 'playerAssetBundleFailure')) THEN 1 ELSE 0 END ;;
+    hidden: yes
+  }
+
+  measure: sum_server_timeout {
+    type: sum
+    sql: ${find_server_timeout} ;;
+    hidden: yes ## Do we want to hide this?
+  }
+
+  measure: server_connect_timeout_rate {
+    type: number
+    sql: ${sum_server_timeout}/CAST(${count} AS DOUBLE) ;;
   }
 
   set: detail {
