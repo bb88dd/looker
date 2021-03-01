@@ -24,3 +24,10 @@ explore: game_end_states {
   label: "Game End States"
   description: "Explore end states of failed games"
 }
+
+
+
+explore: acquisition{
+  label: "Paid acquisition"
+  description: "Explore paid user acquistion"
+}
