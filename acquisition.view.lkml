@@ -65,6 +65,12 @@ GROUP BY
     sql: ${TABLE}.total_spend_usd ;;
   }
 
+  # Dimensions
+  measure: cost_per_player {
+    type: sum
+    sql: ${total_spend_usd} / ${players} ;;
+  }
+
   set: detail {
     fields: [
       utm_source_signup_text,
