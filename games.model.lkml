@@ -31,3 +31,13 @@ explore: acquisition{
   label: "Paid acquisition"
   description: "Explore paid user acquistion"
 }
+
+
+explore: purchase_product {
+  label: "SPGP spend"
+  join: spgp_payout {
+    type: left_outer
+    sql_on: ${purchase_product.user_id} = ${spgp_payout.user_id} ;;
+    relationship: many_to_one
+  }
+}
