@@ -2,18 +2,13 @@ view: purchase_product {
   sql_table_name: mod_immutable.purchase_product ;;
   suggestions: no
 
-  filter: field_name {
-    default_value: "2 months"
-  }
-
   dimension: app_fqn {
     type: string
     sql: ${TABLE}.app_fqn ;;
   }
 
-  measure: cc_fee_usd_amt {
-    type: sum
-    value_format_name: usd
+  dimension: cc_fee_usd_amt {
+    type: number
     sql: ${TABLE}.cc_fee_usd_amt ;;
   }
 
@@ -22,8 +17,8 @@ view: purchase_product {
     sql: ${TABLE}.country_code ;;
   }
 
-  measure: gross_paid_amt {
-    type: sum
+  dimension: gross_paid_amt {
+    type: number
     sql: ${TABLE}.gross_paid_amt ;;
   }
 
@@ -32,49 +27,44 @@ view: purchase_product {
     sql: ${TABLE}.gross_paid_currency_code ;;
   }
 
-  measure: gross_paid_eth_amt {
-    type: sum
-    value_format: "0.00000000"
+  dimension: gross_paid_eth_amt {
+    type: number
     sql: ${TABLE}.gross_paid_eth_amt ;;
   }
 
-  measure: net_eth_amt {
-    type: sum
-    value_format: "0.00000000"
-    sql: ${TABLE}.net_eth_amt ;;
-  }
-
-  measure: gross_paid_usd_amt {
-    type: sum
-    value_format_name: usd
+  dimension: gross_paid_usd_amt {
+    type: number
     sql: ${TABLE}.gross_paid_usd_amt ;;
   }
 
-  measure: gross_paid_combined_usd_amt {
-    value_format_name: usd
-    type: sum
+  dimension: gross_revenue_usd_amt {
+    type: number
     sql: ${TABLE}.gross_revenue_usd_amt ;;
   }
 
-  measure: net_amt {
-    type: sum
+  dimension: net_amt {
+    type: number
     sql: ${TABLE}.net_amt ;;
   }
 
-  measure: net_usd_amt {
-    type: sum
-    value_format_name: usd
-    sql: ${TABLE}.net_usd_amt ;;
+  dimension: net_eth_amt {
+    type: number
+    sql: ${TABLE}.net_eth_amt ;;
   }
 
-  dimension: payment_method {
-    type:  string
-    sql: ${TABLE}.payment_method ;;
+  dimension: net_usd_amt {
+    type: number
+    sql: ${TABLE}.net_usd_amt ;;
   }
 
   dimension: payer_wallet_address {
     type: string
     sql: ${TABLE}.payer_wallet_address ;;
+  }
+
+  dimension: payment_method {
+    type: string
+    sql: ${TABLE}.payment_method ;;
   }
 
   dimension: product_category_name {
@@ -97,8 +87,8 @@ view: purchase_product {
     sql: ${TABLE}.product_name ;;
   }
 
-  measure: product_qty {
-    type: sum
+  dimension: product_qty {
+    type: number
     sql: ${TABLE}.product_qty ;;
   }
 
@@ -107,12 +97,27 @@ view: purchase_product {
     sql: ${TABLE}.product_sku_code ;;
   }
 
+  dimension_group: purchase {
+    type: time
+    timeframes: [
+      raw,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    convert_tz: no
+    datatype: date
+    sql: ${TABLE}.purchase_date ;;
+  }
+
   dimension: purchase_id {
     type: string
     sql: ${TABLE}.purchase_id ;;
   }
 
-  dimension_group: purchase {
+  dimension_group: purchase_ts {
     type: time
     timeframes: [
       raw,
@@ -126,20 +131,18 @@ view: purchase_product {
     sql: ${TABLE}.purchase_ts ;;
   }
 
-  measure: referrer_fee_amt {
-    type: sum
+  dimension: referrer_fee_amt {
+    type: number
     sql: ${TABLE}.referrer_fee_amt ;;
   }
 
-  measure: referrer_fee_eth_amt {
-    type: sum
-    value_format: "0.00000000"
+  dimension: referrer_fee_eth_amt {
+    type: number
     sql: ${TABLE}.referrer_fee_eth_amt ;;
   }
 
-  measure: referrer_fee_usd_amt {
-    type: sum
-    value_format_name: usd
+  dimension: referrer_fee_usd_amt {
+    type: number
     sql: ${TABLE}.referrer_fee_usd_amt ;;
   }
 
@@ -169,18 +172,12 @@ view: purchase_product {
   }
 
   dimension: user_id {
-    hidden: yes
     type: number
-    sql:${TABLE}.user_id ;;
-  }
-  measure: user_count {
-    type: count_distinct
     sql: ${TABLE}.user_id ;;
   }
 
-  measure: xsolla_fee_usd_amt {
-    type: sum
-    value_format_name: usd
+  dimension: xsolla_fee_usd_amt {
+    type: number
     sql: ${TABLE}.xsolla_fee_usd_amt ;;
   }
 
@@ -189,10 +186,10 @@ view: purchase_product {
     sql: ${TABLE}.xsolla_transaction_id ;;
   }
 
-  measure: avg_revenue_per_customer {
-    type: number
+  measure: gross_paid_usd {
     value_format_name: usd
-    sql: ${gross_paid_combined_usd_amt} / ${user_count} ;;
+    type: sum
+    sql: ${gross_revenue_usd_amt} ;;
   }
 
   measure: count {

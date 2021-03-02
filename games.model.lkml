@@ -31,20 +31,3 @@ explore: acquisition{
   label: "Paid acquisition"
   description: "Explore paid user acquistion"
 }
-
-
-
-explore: purchase_product {
-  label: "Purchase Product"
-  description: "Purchase information at the product level"
-  join: user_dna_profile {
-    type: "left_outer"
-    sql_on: ${purchase_product.user_id} = ${user_dna_profile.user_id} ;;
-    relationship: many_to_one
-  }
-  join: spgp_payout {
-    type: "left_outer"
-    sql_on: ${purchase_product.user_id} = ${spgp_payout.user_id};;
-    relationship: many_to_one
-  }
-}
