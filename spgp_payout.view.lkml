@@ -44,6 +44,11 @@ view: spgp_payout {
     sql: ${TABLE}.gu_pay_out ;;
   }
 
+  measure: spgp_payout {
+    type: sum
+    sql: ${TABLE}.gu_pay_out ;;
+  }
+
   set: detail {
     fields: [user_id, account_status, supported_status, gu_pay_out]
   }

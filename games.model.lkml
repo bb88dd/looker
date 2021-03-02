@@ -33,11 +33,21 @@ explore: acquisition{
 }
 
 
-explore: purchase_product {
-  label: "SPGP spend"
-  join: spgp_payout {
-    type: left_outer
-    sql_on: ${purchase_product.user_id} = ${spgp_payout.user_id} ;;
-    relationship: many_to_one
-  }
+
+#explore: spgp_payout {
+#  label: "SPGP spend"
+#  join: purchase_product {
+#    type: left_outer
+#    sql_on: ${purchase_product.user_id} = ${spgp_payout.user_id} ;;
+#    relationship: one_to_many
+#  }
+#  join: user_dna_profile {
+#    type: left_outer
+#    sql_on: ${spgp_payout.user_id} = ${user_dna_profile.user_id} ;;
+#    relationship: one_to_one
+#  }
+#}
+
+explore: spgp_ref_spend {
+  label: "SPGP and REF spending"
 }
