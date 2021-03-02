@@ -9,8 +9,8 @@ view: spgp_ref_spend {
       , t1.product_name
       , (CASE WHEN (t2.account_create_ts < TIMESTAMP '2021-02-25 01:00:00.000+00:00') THEN 'pre-spgp' ELSE 'post-spgp' END) AS account_created
       , (CASE WHEN (t1.purchase_ts < TIMESTAMP '2021-02-25 01:00:00.000+00:00') THEN 'pre-spgp' ELSE 'post-spgp' END) AS purchase_timing
-      , (CASE WHEN (t1.user_id IN (SELECT referee FROM std_apollo.referral_campaign)) THEN true ELSE false END) AS was_referred
-      , (CASE WHEN (t1.user_id IN (SELECT user_id FROM std_apollo.campaign_integration_user WHERE verification_status = 'approved')) THEN true ELSE false END) AS cb_wallet_linked
+      , (CASE WHEN (t1.user_id IN (SELECT referee FROM std_apollo.referral_campaign)) THEN 'REF' ELSE 'non-REF' END) AS was_referred
+      , (CASE WHEN (t1.user_id IN (SELECT user_id FROM std_apollo.campaign_integration_user WHERE verification_status = 'approved')) THEN 'CB-wallet-linked' ELSE 'non-CB-wallet-linked' END) AS cb_wallet_linked
       FROM
       mod_immutable.purchase_product t1
       LEFT JOIN
