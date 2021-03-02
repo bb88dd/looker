@@ -69,7 +69,9 @@ GROUP BY
   measure: cost_per_player {
     type: sum
     sql: ${total_spend_usd} / ${players} ;;
+    drill_fields: [utm_source_signup_text, utm_medium_signup_text, cost_per_player]
   }
+
 
   set: detail {
     fields: [
