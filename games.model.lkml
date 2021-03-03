@@ -2,6 +2,8 @@ connection: "athena"
 
 include: "/views/*/*.view.lkml"                # include all views in the views/ folder in this project
 include: "*.view.lkml"                      # include all views in the views/ folder in this project
+include: "/views/*.view.lkml"                # include all views in the views/ folder in this project
+# include: "/**/*.view.lkml"                 # include all views in this project
 # include: "/**/*.view.lkml"                 # include all views in this project
 # include: "my_dashboard.dashboard.lookml"   # include a LookML dashboard called my_dashboard
 
@@ -19,6 +21,13 @@ include: "*.view.lkml"                      # include all views in the views/ fo
 #     sql_on: ${users.id} = ${orders.user_id} ;;
 #   }
 # }
+
+# Explore of the player_game_event made for GU engineering team to investigate stability issues.
+explore: player_game_event {
+  label: "Game Engineering"
+  description: "Game data for each unique game_id and user_id combination"
+}
+
 
 explore: game_end_states {
   label: "Game End States"
