@@ -26,6 +26,9 @@ include: "/views/*.view.lkml"                # include all views in the views/ f
 explore: player_game_event {
   label: "Game Engineering"
   description: "Game data for each unique game_id and user_id combination"
+  always_filter: {
+    filters: [player_game_event.partition_date: "7 days"]
+  }
 }
 
 

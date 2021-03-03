@@ -147,6 +147,49 @@ view: player_game_event {
 
 
 # MESAURES
+  measure: distinct_game_ids {
+    type: count_distinct
+    sql: ${game_id} ;;
+  }
+
+  # serverTimeoutConnect + playerAssetBundleFailure rate.
+  dimension: sct_asset_failure {
+    type: number
+    sql: CASE WHEN ((${shutdown_reason_text} = 'serverConnectTimeout') OR (${shutdown_reason_text} = 'playerAssetBundleFailure')) THEN 1 ELSE 0 END ;;
+    hidden: yes
+  }
+
+  measure: sct_asset_failure_sum {
+    type: sum
+    sql: ${sct_asset_failure} ;;
+    hidden: yes
+  }
+
+  measure: server_connect_asset_bundle_failure_rate {
+    type: number
+    sql: ${sct_asset_failure_sum} / CAST(${count} AS DOUBLE) ;;
+    description: "% of all games that have shutdown reasons serverConnectTimeout or PlayerAssetBundleFailure"
+  }
+
+  # playerDisconnect + playerTerminated rate.
+  dimension: disconnect_terminate_failure {
+    type: number
+    sql: CASE WHEN (((${shutdown_reason_text} = 'playerDisconnect') OR (${shutdown_reason_text} = 'playerTerminated')) AND (${game_started_indc} = False)) THEN 1 ELSE 0 END ;;
+    hidden: yes
+  }
+
+  measure: disconnect_terminate_sum {
+    type: sum
+    sql: ${disconnect_terminate_failure} ;;
+    hidden: yes
+  }
+
+  measure: disconnect_terminate_rate {
+    type: number
+    sql: ${disconnect_terminate_sum} / CAST(${count} AS DOUBLE) ;;
+    description: "% of all games that have shutdown reasons playerDisconnect or playerTerminated"
+  }
+
 
 
 
