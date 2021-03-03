@@ -167,7 +167,7 @@ view: player_game_event {
 
   measure: server_connect_asset_bundle_failure_rate {
     type: number
-    sql: ${sct_asset_failure_sum} / CAST(${count} AS DOUBLE) ;;
+    sql: ${sct_asset_failure_sum} / CAST(${distinct_game_ids} AS DOUBLE) ;;
     description: "% of all games that have shutdown reasons serverConnectTimeout or PlayerAssetBundleFailure"
   }
 
