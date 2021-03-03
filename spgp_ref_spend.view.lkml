@@ -33,6 +33,17 @@ view: spgp_ref_spend {
     sql: ${TABLE}.gross_revenue_usd_amt ;;
   }
 
+  measure: user_count {
+    type: count_distinct
+    sql: ${TABLE}.user_id ;;
+  }
+
+  measure: avg_revenue_per_customer {
+    type: number
+    value_format_name: usd
+    sql: ${revenue_usd} / ${user_count} ;;
+  }
+
   dimension: user_id {
     type: number
     sql: ${TABLE}.user_id ;;
