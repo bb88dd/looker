@@ -51,6 +51,7 @@ view: player_game_event {
   dimension: player_game_soft_locked_indc {
     type: yesno
     sql: ${TABLE}.player_game_soft_locked_indc ;;
+    group_label: "player_info"
   }
 
   dimension: connect_qty {
@@ -76,11 +77,13 @@ view: player_game_event {
   dimension: player_client_server_state_id {
     type: number
     sql: ${TABLE}.player_client_server_state_id ;;
+    group_label: "player_info"
   }
 
   dimension: player_client_state_id {
     type: number
     sql: ${TABLE}.player_client_state_id ;;
+    group_label: "player_info"
   }
 
   dimension: player_client_version_no {
@@ -150,14 +153,42 @@ view: player_game_event {
   measure: distinct_game_ids {
     type: count_distinct
     sql: ${game_id} ;;
+    drill_fields: [game_start_ts_date, game_id]
   }
 
-  # serverTimeoutConnect + playerAssetBundleFailure rate.
-  dimension: sct_asset_failure {
-    type: number
-    sql: CASE WHEN ((${shutdown_reason_text} = 'serverConnectTimeout') OR (${shutdown_reason_text} = 'playerAssetBundleFailure')) THEN 1 ELSE 0 END ;;
-    hidden: yes
+  # Calculate the serverTimeoutConnect + playerAssetBundleFailure + serverLifetimeFailure rate.
+  # Step 1: Create a boolean to filter for games with serverConnectTimeout or playerAssetBundleFailure or serverLifetimeFailure.
+  dimension: sct_asset_failure_boolean {
+    type: yesno
+    # sql: ((${shutdown_reason_text} = 'serverConnectTimeout') OR (${shutdown_reason_text} = 'playerAssetBundleFailure') OR (${shutdown_reason_text} = 'serverLifetimeFailure'));;
+    sql: ((${shutdown_reason_text} = 'serverConnectTimeout') OR (${shutdown_reason_text} = 'playerAssetBundleFailure'));;
+    hidden: no
   }
+
+  # Step 2: count distinct on game_id filtered for games with serverConnectTimeout or playerAssetBundleFailure or serverLifetimeFailure (using the boolean filter created in step 1).
+  # A filter on game_started_indc = False has been added also. All of these shutdown_reason_text should occur exclusively for games that fail to start so this probably isn't required.
+  measure: count_sessions_fail {
+    type: count_distinct
+    sql: ${game_id} ;;
+    filters: [sct_asset_failure_boolean: "Yes"]
+  }
+
+  # Step 3: calculate the rate by dividing the result from step 2 by total distinct game_ids.
+  measure: fail_to_start_game_error_rate {
+    type: number
+    sql: CAST(${count_sessions_fail} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE);;
+    hidden: no
+    description: "The rate that serverConnectTimeout + playerAssetBundleFailure + serverLifetimeFailure shutdown reasons occur."
+  }
+
+
+  # serverTimeoutConnect + playerAssetBundleFailure rate.
+      dimension: sct_asset_failure {
+      type: number
+      sql: CASE WHEN ((${shutdown_reason_text} = 'serverConnectTimeout') OR (${shutdown_reason_text} = 'playerAssetBundleFailure')) THEN 1 ELSE 0 END ;;
+      hidden: no
+    }
+
 
   measure: sct_asset_failure_sum {
     type: sum
@@ -165,11 +196,35 @@ view: player_game_event {
     hidden: yes
   }
 
+  dimension_group: partition {
+    type: time
+    timeframes: [
+      raw,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    convert_tz: no
+    datatype: date
+    sql: ${TABLE}.partition_date ;;
+    hidden: no
+    description: "This is an index / partition. Use it in all your queries to make queries MUCH faster."
+  }
+
+
+
+
+
   measure: server_connect_asset_bundle_failure_rate {
     type: number
     sql: ${sct_asset_failure_sum} / CAST(${distinct_game_ids} AS DOUBLE) ;;
     description: "% of all games that have shutdown reasons serverConnectTimeout or PlayerAssetBundleFailure"
   }
+
+
+
 
   # playerDisconnect + playerTerminated rate.
   dimension: disconnect_terminate_failure {
@@ -246,22 +301,6 @@ view: player_game_event {
       year
     ]
     sql: ${TABLE}.event_ts ;;
-    hidden: yes
-  }
-
-  dimension_group: partition {
-    type: time
-    timeframes: [
-      raw,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
-    convert_tz: no
-    datatype: date
-    sql: ${TABLE}.partition_date ;;
     hidden: yes
   }
 
