@@ -154,7 +154,7 @@ view: player_game_event {
   measure: distinct_game_ids {
     type: count_distinct
     sql: ${game_id} ;;
-    drill_fields: [game_start_ts_time, game_id]
+    drill_fields: [game_start_ts_hour, game_id]
   }
 
   # Calculate the serverTimeoutConnect + playerAssetBundleFailure + serverLifetimeFailure rate.
