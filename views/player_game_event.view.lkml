@@ -159,7 +159,7 @@ view: player_game_event {
 
   # Calculate the serverTimeoutConnect + playerAssetBundleFailure + serverLifetimeFailure rate.
   # Step 1: Create a boolean to filter for games with serverConnectTimeout or playerAssetBundleFailure or serverLifetimeFailure.
-  dimension: sct_asset_failure_boolean {
+  dimension: failed_connect_boolean {
     type: yesno
     sql: ((${shutdown_reason_text} = 'serverConnectTimeout') OR (${shutdown_reason_text} = 'playerAssetBundleFailure') OR (${shutdown_reason_text} = 'serverLifetimeFailure'));;
     # sql: ((${shutdown_reason_text} = 'serverConnectTimeout') OR (${shutdown_reason_text} = 'playerAssetBundleFailure'));;
@@ -168,23 +168,23 @@ view: player_game_event {
 
   # Step 2: count distinct on game_id filtered for games with serverConnectTimeout or playerAssetBundleFailure or serverLifetimeFailure (using the boolean filter created in step 1).
   # A filter on game_started_indc = False has been added also. All of these shutdown_reason_text should occur exclusively for games that fail to start so this probably isn't required.
-  measure: count_sessions_fail {
+  measure: failed_connect_count {
     type: count_distinct
     sql: ${game_id} ;;
-    filters: [sct_asset_failure_boolean: "Yes"]
+    filters: [failed_connect_boolean: "Yes"]
   }
 
   # Step 3: calculate the rate by dividing the result from step 2 by total distinct game_ids.
-  measure: fail_to_start_game_error_rate {
+  measure: failed_connection_rate {
     type: number
-    sql: CAST(${count_sessions_fail} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE);;
+    sql: CAST(${failed_connect_count} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE);;
     hidden: no
     description: "The rate that serverConnectTimeout + playerAssetBundleFailure + serverLifetimeFailure shutdown reasons occur."
   }
 
   # Calculate the playerDisconnect + playerTerminated rate.
   # Step 1: Create a boolean to filter for games with playerDisconnect or playerTerminated.
-  dimension: boolean_filter_fail_to_start_player {
+  dimension: player_abort_boolean {
     type: yesno
     sql: ((${shutdown_reason_text} = 'playerDisconnect') OR (${shutdown_reason_text} = 'playerTerminated'));;
     hidden: yes
@@ -192,19 +192,19 @@ view: player_game_event {
 
   # Step 2: count distinct on game_id filtered for games with playerDisconnect or playerTerminated (using the boolean filter created in step 1).
   # A filter on game_started_indc = False has been added also. This is required because these errors can occur in games that have started.
-  measure: count_fail_to_start_player {
+  measure: player_abort_count {
     type: count_distinct
     sql: ${game_id} ;;
     filters: [
-      boolean_filter_fail_to_start_player: "Yes",
+      player_abort_boolean: "Yes",
       game_started_indc: "No"
       ]
   }
 
   # Step 3: calculate the rate by dividing the result from step 2 by total distinct game_ids.
-  measure: fail_to_start_player_exit_rate {
+  measure: player_abort_rate {
     type: number
-    sql: CAST(${count_fail_to_start_player} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE) ;;
+    sql: CAST(${player_abort_count} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE) ;;
     description: "The rate that playerDisconnect + playerTerminated shutdown reasons occur for games that fail to start."
 
   }
