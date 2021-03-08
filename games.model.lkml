@@ -31,6 +31,11 @@ explore: player_game_event {
   }
 }
 
+explore: user_dna_profile {
+  label: "User DNA"
+  description: "A detail view of metrics at the user_id level"
+}
+
 
 explore: game_end_states {
   label: "Game End States"

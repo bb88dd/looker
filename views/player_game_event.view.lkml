@@ -214,7 +214,7 @@ view: player_game_event {
   # Step 1: Create a boolean to filter for games we count as completed.
   dimension: game_completed_boolean {
     type: yesno
-    sql:  (game_started_indc = True) AND (total_turn_qty >= 8) AND (shutdown_reason_text IN ('godDefeated', 'playerConcede', 'playerTerminated', 'playerDisconnect', 'godFatigued'));;
+    sql:  (game_started_indc = True) AND (total_turn_qty >= 6) AND (shutdown_reason_text IN ('godDefeated', 'playerConcede', 'playerTerminated', 'playerDisconnect', 'godFatigued'));;
     hidden: yes
   }
 
