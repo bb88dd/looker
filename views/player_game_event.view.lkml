@@ -209,6 +209,39 @@ view: player_game_event {
 
   }
 
+  # Calcuate the games of GU played each day. We need to exclude games do not complete mulligan, last for more than N turns, etc.
+  # Create a boolean for games to count.
+  # Step 1: Create a boolean to filter for games we count as completed.
+  dimension: game_completed_boolean {
+    type: yesno
+    sql:  (game_started_indc = True) AND (total_turn_qty >= 4) AND (shutdown_reason_text IN ('godDefeated', 'playerConcede', 'playerTerminated', 'playerDisconnect', 'godFatigued'));;
+    hidden: yes
+  }
+
+  # Step 2:
+  measure: game_completed {
+    type: count_distinct
+    sql: ${game_id} ;;
+    filters: [game_completed_boolean: "Yes"]
+  }
+
+
+  # Daily active players.
+  measure: distinct_players {
+    type: count_distinct
+    sql: ${user_id} ;;
+    filters: [game_completed_boolean: "Yes"]
+  }
+
+
+  # Average games per player.
+  measure: average_games_per_player {
+    type: number
+    sql: CAST(${game_completed} AS DOUBLE) / CAST(${distinct_players} AS DOUBLE) ;;
+  }
+
+
+
   # serverTimeoutConnect + playerAssetBundleFailure rate.
       dimension: sct_asset_failure {
       type: number
