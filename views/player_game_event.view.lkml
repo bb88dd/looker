@@ -218,7 +218,7 @@ view: player_game_event {
     hidden: yes
   }
 
-  # Step 2:
+  # Step 2: count the distinct game_ids that qualify as complete.
   measure: game_completed {
     type: count_distinct
     sql: ${game_id} ;;
@@ -226,24 +226,202 @@ view: player_game_event {
   }
 
   # Calculate the failed reconnect rate. This is when connects != disconnects + 2.
+  # Step 1: Create a boolean to filter for games where connect_qty - disconnect_qty != 2.
   dimension: reconnect_boolean {
     type: yesno
     sql: (connect_qty - disconnect_qty = 2) ;;
   }
 
+  # Step 2: count the distinct game_ids that failed to reconnect.
   measure: failed_reconnect_count {
     type: count_distinct
     sql:  ${game_id};;
     filters: [reconnect_boolean: "No"]
   }
 
+  # Step 3: calculate the rate by dividing the result from step 2 by total distinct game_ids.
   measure: failed_reconnect_rate {
     type: number
     sql: CAST(${failed_reconnect_count} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE) ;;
   }
 
+  # Calculate the rate for games where a deck fails to load. Deck load games can be found by looking for games that go for less than 3 turns and shutdown reason = godFatigued.
+  # Step 1: Create a boolean to filter for games where decks fail to load
+  dimension: failed_deck_load_boolean {
+    type: yesno
+    sql: (shutdown_reason_text = 'godFatigued') AND (total_turn_qty <= 3) ;;
+    hidden: yes
+  }
+
+  # Step 2: count the distinct game_ids that failed to reconnect.
+  measure: failed_deck_load_count {
+    type: count_distinct
+    sql: ${game_id} ;;
+    filters: [failed_deck_load_boolean: "Yes"]
+  }
+
+  # Step 3: calculate the rate by dividing the result from step 2 by total distinct game_ids.
+  measure: failed_deck_load_rate {
+    type: number
+    sql: CAST(${failed_deck_load_count}AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE);;
+  }
+
+  # Make a rate for each of the 8 shutdown reasons.
+  # godDefeated.
+  dimension: god_defeated_boolean {
+    type: yesno
+    sql:  shutdown_reason_text = 'godDefeated';;
+    hidden: yes
+  }
+
+  measure: god_defeated_count {
+    type: count_distinct
+    sql: ${game_id} ;;
+    filters: [god_defeated_boolean: "Yes"]
+    hidden: yes
+  }
+
+  measure: god_defeated_rate {
+    type: number
+    sql: CAST(${god_defeated_count} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE);;
+  }
+
+  # playerConcede.
+  dimension: player_concede_boolean {
+    type: yesno
+    sql:  shutdown_reason_text = 'playerConcede';;
+    hidden: yes
+  }
+
+  measure: player_concede_count {
+    type: count_distinct
+    sql: ${game_id} ;;
+    filters: [player_concede_boolean: "Yes"]
+    hidden: yes
+  }
+
+  measure: player_concede_rate {
+    type: number
+    sql: CAST(${player_concede_count} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE);;
+  }
+
+  # serverConnectTimeout.
+  dimension: server_connect_timeout_boolean {
+    type: yesno
+    sql:  shutdown_reason_text = 'serverConnectTimeout';;
+    hidden: yes
+  }
+
+  measure: server_connect_timeout_count {
+    type: count_distinct
+    sql: ${game_id} ;;
+    filters: [server_connect_timeout_boolean: "Yes"]
+    hidden: yes
+  }
+
+  measure: server_connect_timeout_rate {
+    type: number
+    sql: CAST(${server_connect_timeout_count} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE);;
+  }
+
+  # playerTerminated.
+  dimension: player_terminated_boolean {
+    type: yesno
+    sql:  shutdown_reason_text = 'playerTerminated';;
+    hidden: yes
+  }
+
+  measure: player_terminated_count {
+    type: count_distinct
+    sql: ${game_id} ;;
+    filters: [player_terminated_boolean: "Yes"]
+    hidden: yes
+  }
+
+  measure: player_terminated_rate {
+    type: number
+    sql: CAST(${player_terminated_count} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE);;
+  }
+
+  # serverLifetimeTimeout.
+  dimension: server_lifetime_timeout_boolean {
+    type: yesno
+    sql:  shutdown_reason_text = 'serverLifetimeTimeout';;
+    hidden: yes
+  }
+
+  measure: server_lifetime_timeout_count {
+    type: count_distinct
+    sql: ${game_id} ;;
+    filters: [server_lifetime_timeout_boolean: "Yes"]
+    hidden: yes
+  }
+
+  measure: server_lifetime_timeout_rate {
+    type: number
+    sql: CAST(${server_lifetime_timeout_count} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE);;
+  }
+
+  # playerDisconnect.
+  dimension: player_disconnect_boolean {
+    type: yesno
+    sql:  shutdown_reason_text = 'playerDisconnect';;
+    hidden: yes
+  }
+
+  measure: player_disconnect_count {
+    type: count_distinct
+    sql: ${game_id} ;;
+    filters: [player_disconnect_boolean: "Yes"]
+    hidden: yes
+  }
+
+  measure: player_disconnect_rate {
+    type: number
+    sql: CAST(${player_disconnect_count} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE);;
+  }
+
+  # playerAssetBundleFailure.
+  dimension: player_asset_bundle_failure_boolean {
+    type: yesno
+    sql:  shutdown_reason_text = 'playerAssetBundleFailure';;
+    hidden: yes
+  }
+
+  measure: player_asset_bundle_failure_count {
+    type: count_distinct
+    sql: ${game_id} ;;
+    filters: [player_asset_bundle_failure_boolean: "Yes"]
+    hidden: yes
+  }
+
+  measure: player_asset_bundle_failure_rate {
+    type: number
+    sql: CAST(${player_asset_bundle_failure_count} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE);;
+  }
+
+  # godFatigued.
+  dimension: god_fatigued_boolean {
+    type: yesno
+    sql:  shutdown_reason_text = 'godFatigued';;
+    hidden: yes
+  }
+
+  measure: god_fatigued_count {
+    type: count_distinct
+    sql: ${game_id} ;;
+    filters: [god_fatigued_boolean: "Yes"]
+    hidden: yes
+  }
+
+  measure: god_fatigued_rate {
+    type: number
+    sql: CAST(${god_fatigued_count} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE);;
+  }
+
 
   # Daily active players.
+  # Use the reconnect_boolean flag to ensure we only count a player as active if they complete a game.
   measure: distinct_players {
     type: count_distinct
     sql: ${user_id} ;;
@@ -258,7 +436,7 @@ view: player_game_event {
   }
 
 
-
+  # TO BE DELETED
   # serverTimeoutConnect + playerAssetBundleFailure rate.
       dimension: sct_asset_failure {
       type: number
@@ -272,6 +450,7 @@ view: player_game_event {
     sql: ${sct_asset_failure} ;;
     hidden: yes
   }
+  # TO BE DELETED
 
   dimension_group: partition {
     type: time
