@@ -225,6 +225,23 @@ view: player_game_event {
     filters: [game_completed_boolean: "Yes"]
   }
 
+  # Calculate the failed reconnect rate. This is when connects != disconnects + 2.
+  dimension: reconnect_boolean {
+    type: yesno
+    sql: (connect_qty - disconnect_qty = 2) ;;
+  }
+
+  measure: failed_reconnect_count {
+    type: count_distinct
+    sql:  ${game_id};;
+    filters: [reconnect_boolean: "No"]
+  }
+
+  measure: failed_reconnect_rate {
+    type: number
+    sql: CAST(${failed_reconnect_count} AS DOUBLE) / CAST(${distinct_game_ids} AS DOUBLE) ;;
+  }
+
 
   # Daily active players.
   measure: distinct_players {
