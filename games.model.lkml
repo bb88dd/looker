@@ -27,7 +27,7 @@ explore: player_game_event {
   label: "Game Engineering"
   description: "Game data for each unique game_id and user_id combination"
   always_filter: {
-    filters: [player_game_event.partition_date: "8 days"]
+    filters: [player_game_event.partition_date: "28 days"]
   }
 }
 
